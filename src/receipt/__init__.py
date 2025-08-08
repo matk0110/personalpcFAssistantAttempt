@@ -1,0 +1,1 @@
+# This file marks the receipt directory as a package.

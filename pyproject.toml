@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "financial-advisor"
+version = "0.1.0"
+description = "A budget management application that tracks spending and manages receipts."
+authors = ["Your Name <youremail@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pytesseract = "^0.3.8"
+# Add other dependencies as needed
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2"
+# Add other development dependencies as needed
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

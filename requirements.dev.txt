@@ -1,0 +1,6 @@
+pytesseract
+pytest==8.2.0
+flake8
+mypy
+black
+isort

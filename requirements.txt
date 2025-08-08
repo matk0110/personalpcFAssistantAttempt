@@ -1,0 +1,13 @@
+pytesseract==0.3.10
+Pillow==10.3.0
+Flask
+Streamlit
+requests
+numpy
+pandas
+opencv-python
+pytest
+pytest-cov
+mypy
+black
+flake8
