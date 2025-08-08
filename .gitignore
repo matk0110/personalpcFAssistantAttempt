@@ -1,0 +1,49 @@
+# Root-level ignore patterns
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Packaging / build
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Coverage / test / type caches
+.coverage*
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# Environments
+.env
+.env.*
+.venv/
+venv/
+ENV/
+env/
+Pipfile.lock
+poetry.lock
+
+# IDE/Editor
+.vscode/
+.idea/
+
+# OS / misc
+.DS_Store
+Thumbs.db
+
+# Runtime data (don’t commit local state)
+data/
+receipts_samples/
+*.log
+
+# Streamlit
+.streamlit/
+
+# Jupyter
+.ipynb_checkpoints/

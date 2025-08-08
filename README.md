@@ -68,6 +68,24 @@ Exported 4 transactions to export/transactions.csv.
 pytest -q
 ```
 
+## Optional OCR (Portable / Local Install)
+If you want to use OCR features (receipt image to text) without installing Tesseract system-wide:
+
+1. Create folder `tools/tesseract/` at repo root.
+2. Download a Windows Tesseract build (e.g. UB Mannheim) and copy `tesseract.exe` into that folder.
+3. (Optional) Put language data (`.traineddata` files) inside `tools/tesseract/tessdata/`.
+4. Install Python deps if not already:
+  ```bash
+  pip install Pillow pytesseract
+  ```
+5. Use the OCR helpers:
+  ```python
+  from src.receipt.ocr import extract_lines
+  lines = extract_lines("receipt.jpg")
+  ```
+
+If a system-wide install is preferred, just ensure `tesseract` is on PATH. The module auto-detects a portable binary at `tools/tesseract/tesseract.exe` if present.
+
 ## Structure
 ```
 src/
