@@ -46,3 +46,15 @@ class BudgetService:
                 cat.limit = _money(limit)
         self.store.save_budget(b)
         return b
+
+    def list_limits(self, month: str) -> List[dict]:
+        b = self.store.get_budget(month)
+        if not b:
+            return []
+        out: List[dict] = []
+        for name, cat in sorted(b.categories.items()):
+            out.append({
+                "category": name,
+                "limit": str(cat.limit)
+            })
+        return out

@@ -17,7 +17,7 @@ from llm.adapter import MockLLMAdapter
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("chat")
 
-HELP_TEXT = """Commands:\n add 12.34 groceries milk and bread\n budget [category]\n receipt: <paste receipt text>\n summary 7d|30d\n help\n"""
+HELP_TEXT = """Commands:\n add 12.34 groceries milk and bread [on YYYY-MM-DD]\n set <category> <limit>  # set budget limit for category\n budget [category]\n limits  # list configured limits\n receipt: <paste receipt text>\n summary 7d|30d\n export csv [path]\n help"""
 
 class ChatOrchestrator:
     def __init__(self, data_path: str = "data/state.json"):
@@ -27,6 +27,20 @@ class ChatOrchestrator:
         self.intent_parser = IntentParser()
         self.receipt_parser = SimpleReceiptParser(CategoryResolver())
         self.llm = MockLLMAdapter()
+
+    def _friendly_remaining(self, line: dict | None) -> str:
+        if not line:
+            return "n/a"
+        # hide negative remaining when limit is zero (auto-created category w/out configured limit)
+        try:
+            limit = Decimal(line.get("limit", "0"))
+            remaining = Decimal(line.get("remaining", "0"))
+        except Exception:
+            return line.get("remaining", "n/a")
+        if limit == 0:
+            # show spent only
+            return f"spent {line['spent']} (no limit)"
+        return str(remaining)
 
     def handle(self, text: str) -> str:
         intent = self.intent_parser.parse(text)
@@ -58,8 +72,19 @@ class ChatOrchestrator:
                 month = self.budget_service.month_key(txn.txn_date)
                 summary = self.budget_service.summary(month)
                 line = next((s for s in summary if s["category"].lower() == cat.lower()), None)
-                remain = line["remaining"] if line else "n/a"
+                remain = self._friendly_remaining(line)
                 return f"Added {amount:.2f} to {cat}. Remaining: {remain}."
+            if name == "set_budget":
+                cat = args["category"].title()
+                try:
+                    limit = Decimal(args["limit"])
+                except Exception:
+                    return "Invalid limit. Use set groceries 300"
+                if limit < 0:
+                    return "Limit must be non-negative."
+                month = self.budget_service.month_key(date.today())
+                self.budget_service.set_limits(month, {cat: limit})
+                return f"Set {cat} limit to {limit:.2f}."
             if name == "show_budget":
                 month = self.budget_service.month_key(date.today())
                 summary = self.budget_service.summary(month)
@@ -71,9 +96,32 @@ class ChatOrchestrator:
                     line = next((s for s in summary if s["category"] == cat), None)
                     if not line:
                         return f"No data for {cat}."
-                    return f"{cat}: spent {line['spent']} / {line['limit']} (remaining {line['remaining']})"
-                rows = [f"{s['category']}: {s['spent']}/{s['limit']} rem {s['remaining']}" for s in summary]
+                    rem = self._friendly_remaining(line)
+                    if rem.startswith("spent"):
+                        return f"{cat}: spent {line['spent']} (no limit)"
+                    return f"{cat}: spent {line['spent']} / {line['limit']} (remaining {rem})"
+                rows = []
+                for s in summary:
+                    rem = self._friendly_remaining(s)
+                    if rem.startswith("spent"):
+                        rows.append(f"{s['category']}: {rem}")
+                    else:
+                        rows.append(f"{s['category']}: {s['spent']}/{s['limit']} rem {rem}")
                 return "Budget\n" + "\n".join(rows)
+            if name == "limits":
+                month = self.budget_service.month_key(date.today())
+                limits = self.budget_service.list_limits(month)
+                if not limits:
+                    return "No limits configured yet. Use set <category> <limit>."
+                lines = [f"{l['category']}: {l['limit']}" for l in limits]
+                return "Limits\n" + "\n".join(lines)
+            if name == "export":
+                target = args.get("target", "csv").lower()
+                if target != "csv":
+                    return "Only csv export supported currently."
+                path = args.get("path") or "export/transactions.csv"
+                count = self.txn_service.export_csv(path)
+                return f"Exported {count} transactions to {path}."
             if name == "receipt":
                 body = args.get("body", "").strip()
                 if not body:

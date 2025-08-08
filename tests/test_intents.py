@@ -33,3 +33,37 @@ def test_add_expense_with_date():
     p = IntentParser()
     r = p.parse("add 10.00 coffee latte on 2025-08-07")
     assert r and r.args["date"] == "2025-08-07"
+
+
+def test_set_budget_intent():
+    p = IntentParser()
+    r = p.parse("set groceries 300")
+    assert r and r.name == "set_budget"
+    assert r.args["category"] == "groceries"
+    assert r.args["limit"] == "300"
+
+
+def test_limits_intent():
+    p = IntentParser()
+    r = p.parse("limits")
+    assert r and r.name == "limits"
+
+
+def test_export_intent_default():
+    p = IntentParser()
+    r = p.parse("export")
+    assert r and r.name == "export"
+
+
+def test_export_intent_with_path():
+    p = IntentParser()
+    r = p.parse("export csv data/out.csv")
+    assert r and r.name == "export"
+    assert r.args["target"] == "csv"
+    assert r.args["path"] == "data/out.csv"
+
+
+def test_negative_amount_captured_for_validation():
+    p = IntentParser()
+    r = p.parse("add -5 food test")
+    assert r and r.args["amount"] == "-5"

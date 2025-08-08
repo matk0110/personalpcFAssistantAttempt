@@ -2,6 +2,8 @@ from __future__ import annotations
 from datetime import date
 from typing import List, Optional, Iterable
 from decimal import Decimal
+import csv
+from pathlib import Path
 
 from core import Transaction, Persistence
 
@@ -25,3 +27,15 @@ class TransactionService:
     def recent(self, n: int = 10) -> List[Transaction]:
         txns = self.list()
         return txns[-n:]
+
+    def export_csv(self, path: str | Path) -> int:
+        """Export all transactions to CSV. Returns count."""
+        txns = self.list()
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["id", "date", "category", "amount", "description"])
+            for t in txns:
+                w.writerow([t.id, t.txn_date.isoformat(), t.category, f"{t.amount:.2f}", t.description])
+        return len(txns)
