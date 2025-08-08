@@ -1,5 +1,10 @@
 import unittest
 from src.persistence.storage import PersistenceManager
+import pytest
+
+@pytest.mark.skip(reason="Legacy PersistenceManager deprecated; persistence covered by service tests.")
+def test_legacy_persistence_manager():
+    assert True
 
 class TestPersistenceManager(unittest.TestCase):
 

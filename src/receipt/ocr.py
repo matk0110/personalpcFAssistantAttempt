@@ -1,24 +1,8 @@
-def perform_ocr(image_path):
-    import pytesseract
-    from PIL import Image
+# Deprecated OCR placeholder. Future OCR integration will live in a new module.
 
-    # Load the image from the specified path
-    image = Image.open(image_path)
+def perform_ocr(*_, **__):
+    raise RuntimeError("perform_ocr deprecated. OCR not part of MVP.")
 
-    # Use pytesseract to perform OCR on the image
-    text = pytesseract.image_to_string(image)
 
-    return text
-
-def extract_receipt_data(ocr_text):
-    # Placeholder function to extract relevant data from OCR text
-    # This function should be implemented to parse the text and extract
-    # items, prices, and other relevant information from the receipt.
-    receipt_data = {}
-    # Example parsing logic (to be implemented)
-    lines = ocr_text.split('\n')
-    for line in lines:
-        # Implement logic to extract data from each line
-        pass
-
-    return receipt_data
+def extract_receipt_data(*_, **__):
+    raise RuntimeError("extract_receipt_data deprecated. Use SimpleReceiptParser for text parsing.")

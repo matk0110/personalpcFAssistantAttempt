@@ -1,5 +1,10 @@
 import unittest
 from src.receipt.parser import ReceiptParser
+import pytest
+
+@pytest.mark.skip(reason="Legacy ReceiptParser deprecated; see test_receipt_parser for current implementation.")
+def test_legacy_receipt_parser():
+    assert True
 
 class TestReceiptParser(unittest.TestCase):
 
